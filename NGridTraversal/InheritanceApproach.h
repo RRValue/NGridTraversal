@@ -41,18 +41,18 @@ public:
     {
         IndexVector result(Size);
 
-        index_impl(idx, result.begin());
+        indexImpl(idx, result.begin());
 
         return result;
     }
 
 protected:
-    void index_impl(const int& resIdx, IndexVectorIter idxIter) const noexcept
+    void indexImpl(const int& resIdx, IndexVectorIter idxIter) const noexcept
     {
         auto res = resIdx % m_Size;
         *idxIter = res;
 
-        ParentType::index_impl((resIdx - res) / m_Size, ++idxIter);
+        ParentType::indexImpl((resIdx - res) / m_Size, ++idxIter);
     }
 
     template<class Calleable, typename _Indices>
@@ -97,7 +97,7 @@ public:
     }
 
 protected:
-    void index_impl(const int& resIdx, IndexVectorIter idxIter) const noexcept
+    void indexImpl(const int& resIdx, IndexVectorIter idxIter) const noexcept
     {
         *idxIter = resIdx;
     }
