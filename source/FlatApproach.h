@@ -41,7 +41,7 @@ public:
     template<class Calleable>
     void doWorkPack(const Calleable& callable) const noexcept
     {
-        doWorkPackImpl(0, callable);
+        //doWorkPackImpl(0, callable);
     }
 
 protected:
@@ -84,26 +84,26 @@ protected:
         }
     }
 
-    template<class... Dims>
+    /*template<class... Dims>
     struct ParamPack
     {
         Dims... m_Pack;
-    };
+    };*/
 
-    template<class Calleable>
-    void doWorkPackImpl(const int& dim, const Calleable& callable, const ParamPack<>& paramPack = ParamPack<>()) const noexcept
-    {
-        const auto final = dim == Size - 1;
-        const auto& s = m_Sizes[dim];
+    //template<class Calleable>
+    //void doWorkPackImpl(const int& dim, const Calleable& callable, const ParamPack<>& paramPack = ParamPack<>()) const noexcept
+    //{
+    //    const auto final = dim == Size - 1;
+    //    const auto& s = m_Sizes[dim];
 
-        for(int i = 0; i < s; i++)
-        {
-            if(final)
-                return; //callable(indices);
-            else
-                doWorkPackImpl(dim + 1, callable, ParamPack(paramPack, i));
-        }
-    }
+    //    for(int i = 0; i < s; i++)
+    //    {
+    //        if(final)
+    //            return; //callable(indices);
+    //        else
+    //            doWorkPackImpl(dim + 1, callable, ParamPack(paramPack, i));
+    //    }
+    //}
 
 private:
     Ints m_Sizes;
