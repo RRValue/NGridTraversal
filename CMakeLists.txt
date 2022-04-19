@@ -23,7 +23,7 @@ ADD_EXECUTABLE(
     NGridTests
     source/FlatApproach.h
     source/InheritanceApproach.h
-    source/main.cpp
+    tests/NGridTests.cpp
 )
 TARGET_LINK_LIBRARIES(
     NGridTests

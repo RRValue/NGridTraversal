@@ -41,7 +41,7 @@ public:
     template<class Calleable>
     void doWorkPack(const Calleable& callable) const noexcept
     {
-        //doWorkPackImpl(0, callable);
+        // doWorkPackImpl(0, callable);
     }
 
 protected:
@@ -90,8 +90,8 @@ protected:
         Dims... m_Pack;
     };*/
 
-    //template<class Calleable>
-    //void doWorkPackImpl(const int& dim, const Calleable& callable, const ParamPack<>& paramPack = ParamPack<>()) const noexcept
+    // template<class Calleable>
+    // void doWorkPackImpl(const int& dim, const Calleable& callable, const ParamPack<>& paramPack = ParamPack<>()) const noexcept
     //{
     //    const auto final = dim == Size - 1;
     //    const auto& s = m_Sizes[dim];
