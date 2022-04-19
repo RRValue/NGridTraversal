@@ -1,5 +1,5 @@
-#include "InheritanceApproach.h"
-//#include "FlatApproach.h"
+//#include "InheritanceApproach.h"
+#include "FlatApproach.h"
 
 #include <array>
 #include <iostream>
