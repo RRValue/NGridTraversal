@@ -54,3 +54,5 @@
 *.pidb
 *.svclog
 *.scc
+/NGridTests\[1\]_include.cmake
+/NGridTests\[1\]_tests.cmake
