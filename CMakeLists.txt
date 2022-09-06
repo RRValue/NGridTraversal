@@ -21,14 +21,15 @@ ENABLE_TESTING()
 
 ADD_EXECUTABLE(
     NGridTests
-    source/FlatApproach.h
-    source/InheritanceApproach.h
+    source/Grid.h
     tests/NGridTests.cpp
 )
 TARGET_LINK_LIBRARIES(
     NGridTests
     gtest_main
 )
+
+TARGET_INCLUDE_DIRECTORIES(NGridTests PUBLIC source)
 
 INCLUDE(GoogleTest)
 
