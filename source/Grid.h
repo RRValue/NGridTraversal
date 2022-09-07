@@ -1,15 +1,16 @@
 #pragma once
 
 #include <array>
-#include <limits>
-#include <vector>
 #include <numeric>
+#include <vector>
 
-template<typename CoordinateType, CoordinateType Dim>
+template<typename T>
+concept NonBoolUnsignedIntegral = std::unsigned_integral<T> && !std::same_as<T, bool>;
+
+template<NonBoolUnsignedIntegral Coordinate, Coordinate Dim>
 class Grid
 {
 public:
-    using Coordinate = typename CoordinateType;
     using Index = unsigned long long;
     using Position = std::array<Coordinate, Dim>;
     using Positions = std::vector<Position>;
@@ -20,9 +21,6 @@ public:
 
 private:
     static_assert(Dim > 0, "Dimension must be greater zero");
-    static_assert(std::is_integral_v<Coordinate>, "Coordinate must be integral");
-    static_assert(std::is_unsigned_v<Coordinate>, "Coordinate must be unsigned");
-    static_assert(!std::is_same_v<Coordinate, bool>, "Coordinate must not be bool");
 
 public:
     constexpr Grid() noexcept : m_Size{}
@@ -53,7 +51,7 @@ public:
         Positions positions;
 
         run([&positions](const auto&... params) { positions.push_back({params...}); });
-        
+
         return positions;
     }
 
@@ -79,7 +77,7 @@ public:
             {
                 const auto& size = m_Size[Dim - c - 1];
                 const auto coord = index_residual % size;
-                
+
                 position[Dim - c - 1] = coord;
                 index_residual = (index_residual - coord) / size;
             }

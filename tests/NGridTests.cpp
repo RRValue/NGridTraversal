@@ -3,7 +3,6 @@
 #include "Grid.h"
 
 #include <algorithm>
-#include <iostream>
 
 template<typename T>
 class GridFixture : public ::testing::Test
