@@ -3,6 +3,7 @@
 #include <array>
 #include <limits>
 #include <vector>
+#include <numeric>
 
 template<typename CoordinateType, CoordinateType Dim>
 class Grid
@@ -44,97 +45,63 @@ public:
 
     constexpr Index numCoordinates() const noexcept
     {
-        return numCoordinatesImpl<0>();
+        return std::accumulate(std::cbegin(m_Size), std::cend(m_Size), Index(1), std::multiplies<Index>());
     }
 
     constexpr Positions positions() const noexcept
     {
-        Positions result;
-        result.reserve(numCoordinates());
+        Positions positions;
 
-        positionsImpl<0>(result);
-
-        return result;
+        run([&positions](const auto&... params) { positions.push_back({params...}); });
+        
+        return positions;
     }
 
     constexpr Index index(const Position& position) const noexcept
     {
-        return indexImpl<0>(position);
+        auto index = Index(0);
+
+        for(Coordinate c = 0; c < Dim; c++)
+            index = index * m_Size[c] + position[c];
+
+        return index;
     }
 
     constexpr Position position(const Index& index) const noexcept
     {
-        Position result;
+        auto position = Position();
+        auto index_residual = index;
 
-        positionImpl<0>(index, result);
+        for(Coordinate c = 0; c < Dim; c++)
+            if(c == Dim - 1)
+                position[Dim - c - 1] = index_residual;
+            else
+            {
+                const auto& size = m_Size[Dim - c - 1];
+                const auto coord = index_residual % size;
+                
+                position[Dim - c - 1] = coord;
+                index_residual = (index_residual - coord) / size;
+            }
 
-        return result;
+        return position;
     }
 
     template<class Calleable, class... Parameter>
     constexpr void run(const Calleable& callable, const Parameter&... parameter) const noexcept
     {
-        runImpl<0>(parameter..., callable);
+        runImpl<0>(callable, parameter...);
     }
 
 private:
-    template<Coordinate _D>
-    constexpr Index indexImpl(const Position& params) const noexcept
+    template<Coordinate _D, class _Calleable, class... Parameter>
+    constexpr void runImpl(const _Calleable& callable, const Parameter&... parameter) const noexcept
     {
-        if constexpr(_D == Dim - 1)
-            return params[Dim - _D - 1];
-        else
-            return params[Dim - _D - 1] + m_Size[Dim - _D - 1] * indexImpl<_D + 1>(params);
-    }
-
-    template<Coordinate _D>
-    constexpr void positionImpl(const Index& index, Position& position) const noexcept
-    {
-        if constexpr(_D == Dim - 1)
-        {
-            position[Dim - _D - 1] = index;
-        }
-        else
-        {
-            position[Dim - _D - 1] = index % m_Size[Dim - _D - 1];
-
-            positionImpl<_D + 1>((index - position[Dim - _D - 1]) / m_Size[Dim - _D - 1], position);
-        }
-    }
-
-    template<Coordinate _D>
-    constexpr Index numCoordinatesImpl() const noexcept
-    {
-        if constexpr(_D == Dim - 1)
-            return m_Size[_D];
-        else
-            return numCoordinatesImpl<_D + 1>() * m_Size[_D];
-    }
-
-    template<Coordinate _D, class... _Coords>
-    constexpr void positionsImpl(Positions& result, const _Coords&... coords) const noexcept
-    {
-        const auto& s = m_Size[_D];
-
-        for(Coordinate c = 0; c < s; c++)
+        for(Coordinate c = 0; c < m_Size[Dim - _D - 1]; c++)
             if constexpr(_D == Dim - 1)
-                result.push_back({coords..., c});
+                callable(c, parameter...);
             else
-                positionsImpl<_D + 1>(result, coords..., c);
-    }
-
-    template<Coordinate _D, class... Parameter, class _Calleable, class... _Coords>
-    constexpr void runImpl(const Parameter&... parameter, const _Calleable& callable, const _Coords&... coords) const noexcept
-    {
-        if constexpr(_D == Dim)
-            callable(coords..., parameter...);
-        else
-        {
-            const auto& s = m_Size[_D];
-
-            for(Coordinate c = 0; c < s; c++)
-                runImpl<_D + 1>(parameter..., callable, coords..., c);
-        }
+                runImpl<_D + 1>(callable, c, parameter...);
     }
 
 private:

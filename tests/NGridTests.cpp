@@ -228,28 +228,42 @@ TYPED_TEST(GridFixture, DoWorkOnSamePositions)
     auto positions_out = decltype(positions_in)();
     positions_out.reserve(positions_in.size());
 
-    const auto callable = [&dim, &positions_out]() {
-        if constexpr(dim == 1)
-            return [&positions_out](const auto& x) { positions_out.push_back({x}); };
-        else if constexpr(dim == 2)
-            return [&positions_out](const auto& x, const auto& y) { positions_out.push_back({x, y}); };
-        else if constexpr(dim == 3)
-            return [&positions_out](const auto& x, const auto& y, const auto& z) { positions_out.push_back({x, y, z}); };
-        else if constexpr(dim == 4)
-            return [&positions_out](const auto& x, const auto& y, const auto& z, const auto& w) { positions_out.push_back({x, y, z, w}); };
-    }();
-
-    this->m_Grid.run(callable);
+    this->m_Grid.run([&positions_out](const auto&... params) { positions_out.push_back({params...}); });
 
     EXPECT_EQ(positions_in, positions_out);
 }
 
-TYPED_TEST(GridFixture, DoWorkExtraParams)
+TYPED_TEST(GridFixture, DoWorkWithExtraParams)
 {
-    // const auto grid = Grid<unsigned char, 2>({3, 4});
-    // const auto callable = [](const auto& x, const auto& y, const auto& extra) {  //
-    //     std::cout << std::to_string(x) << ' ' << std::to_string(y) << ' ' << extra << std::endl;
-    // };
+    using Position = decltype(this->m_Grid)::Position;
 
-    // grid.run(callable, std::string("Test"));
+    const auto& dim = this->m_Grid.Dimensions;
+
+    const auto positions_in = this->m_Grid.positions();
+    auto positions_out = decltype(positions_in)();
+    positions_out.reserve(positions_in.size());
+
+    struct SomeData
+    {
+        int m_Int = 23;
+        float m_Float = 23.0f;
+        double m_Double = 23.0;
+    };
+
+    const auto callable = [&dim, &positions_out]() {
+        if constexpr(dim == 1)
+            return [&positions_out](const auto& x, const auto& p1, const auto& p2) { positions_out.push_back({x}); };
+        else if constexpr(dim == 2)
+            return [&positions_out](const auto& x, const auto& y, const auto& p1, const auto& p2) { positions_out.push_back({x, y}); };
+        else if constexpr(dim == 3)
+            return [&positions_out](const auto& x, const auto& y, const auto& z, const auto& p1, const auto& p2) { positions_out.push_back({x, y, z}); };
+        else if constexpr(dim == 4)
+            return [&positions_out](const auto& x, const auto& y, const auto& z, const auto& w, const auto& p1, const auto& p2) {
+                positions_out.push_back({x, y, z, w});
+            };
+    }();
+
+    this->m_Grid.run(callable, "Text", SomeData{});
+
+    EXPECT_EQ(positions_in, positions_out);
 }
