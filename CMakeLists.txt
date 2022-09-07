@@ -22,6 +22,7 @@ ENABLE_TESTING()
 ADD_EXECUTABLE(
     NGridTests
     source/Grid.h
+    source/GridIterator.h
     tests/NGridTests.cpp
 )
 TARGET_LINK_LIBRARIES(
