@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GridIndexIterator.h"
+
 #include <array>
 #include <numeric>
 #include <vector>
@@ -15,6 +17,9 @@ public:
     using Position = std::array<Coordinate, Dim>;
     using Positions = std::vector<Position>;
     using Size = Position;
+
+    using iterator = GridIndexIterator<Grid<Coordinate, Dim>>;
+    using const_iterator = GridIndexIterator<Grid<Coordinate, Dim>>;
 
 public:
     static const Coordinate Dimensions = Dim;
@@ -36,7 +41,7 @@ public:
         return m_Size;
     }
 
-    constexpr Index largestIndex() const noexcept
+    constexpr Index maxIndex() const noexcept
     {
         return numCoordinates() - 1;
     }
@@ -48,9 +53,10 @@ public:
 
     constexpr Positions positions() const noexcept
     {
-        Positions positions;
+        auto positions = Positions();
+        positions.reserve(numCoordinates());
 
-        run([&positions](const auto&... params) { positions.push_back({params...}); });
+        run([&positions](auto&&... params) { positions.push_back({std::move(params)...}); });
 
         return positions;
     }
@@ -91,15 +97,45 @@ public:
         runImpl<0>(callable, parameter...);
     }
 
+    [[nodiscard]] constexpr iterator begin() noexcept
+    {
+        return iterator(0);
+    }
+
+    [[nodiscard]] constexpr const_iterator begin() const noexcept
+    {
+        return const_iterator(0);
+    }
+
+    [[nodiscard]] constexpr iterator end() noexcept
+    {
+        return iterator(numCoordinates());
+    }
+
+    [[nodiscard]] constexpr const_iterator end() const noexcept
+    {
+        return const_iterator(numCoordinates());
+    }
+
+    [[nodiscard]] constexpr const_iterator cbegin() const noexcept
+    {
+        return begin();
+    }
+
+    [[nodiscard]] constexpr const_iterator cend() const noexcept
+    {
+        return end();
+    }
+
 private:
     template<Coordinate _D, class _Calleable, class... Parameter>
-    constexpr void runImpl(const _Calleable& callable, const Parameter&... parameter) const noexcept
+    constexpr void runImpl(const _Calleable& callable, Parameter&&... parameter) const noexcept
     {
         for(Coordinate c = 0; c < m_Size[Dim - _D - 1]; c++)
             if constexpr(_D == Dim - 1)
-                callable(c, parameter...);
+                callable(std::move(c), std::move(parameter)...);
             else
-                runImpl<_D + 1>(callable, c, parameter...);
+                runImpl<_D + 1>(callable, std::move(c), std::move(parameter)...);
     }
 
 private:
